@@ -1,4 +1,4 @@
-# Goal: Infer Dynamic Bayesian Network (DBN)
+## Goal: Infer Dynamic Bayesian Network (DBN)
 
 #---------------------------------
 # Begin: Step 2: Decomposing the network
@@ -1288,10 +1288,14 @@ learnDbnStructMo1Layer3dParDeg1 <- function(input.data.discr.3D, mi.net.adj.matr
 ## for performing the DBN structure learning.
 ## Uses layering.
 ## 
-learnDbnStructMo1Layer3dParDeg1_v2 <- function(input.data.discr.3D, mi.net.adj.matrix, 
-                                               num.discr.levels, num.nodes, num.timepts, max.fanin, 
-                                               node.names, clr.algo)
-{
+LearnDbnStructMo1Layer3dParDeg1_v2 <- function(input.data.discr.3D, 
+                                               mi.net.adj.matrix, 
+                                               num.discr.levels, 
+                                               num.nodes, 
+                                               num.timepts, 
+                                               max.fanin, 
+                                               node.names, 
+                                               clr.algo) {
   #---------------------------------
   # Begin: Loading the Packages
   #---------------------------------

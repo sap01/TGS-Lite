@@ -96,6 +96,9 @@ num.discr.levels <- input.params$num.discr.levels
 ## Name of the discretization algorithm to be applied
 discr.algo <- input.params$discr.algo
 
+## Auto regressive order
+auto.reg.order <- input.params$auto.reg.order
+
 mi.estimator <- input.params$mi.estimator
 
 apply.aracne <- input.params$apply.aracne
@@ -109,6 +112,11 @@ max.fanin <- input.params$max.fanin
 ## allow.self.loop takes values true or false, dependending on whether 
 ## to allow self loops in the predicted rolled network or not.
 allow.self.loop <- input.params$allow.self.loop
+
+## If TRUE, then use TGS-Lite
+use.lite <- input.params$use.lite
+
+scoring.func <- input.params$scoring.func
 
 rm(input.params)
 ##------------------------------------------------------------
@@ -184,7 +192,10 @@ source(paste(init.path, 'compute_cmi.R', sep = '/'))
 source(paste(init.path, 'learn_mi_net_struct.R', sep = '/'))
 
 # Parallel programming with degree of parallelism 1 and Serial Programming
-source(paste(init.path, 'learnDbnStruct3dParDeg1.R', sep = '/'))
+source(paste(init.path, 'learn_dbn_struct_3d_par_deg1.R', sep = '/'))
+
+source(paste(init.path, 'learn_dbn_struct_3d_par_deg1_lite.R', sep = '/'))
+source(paste(init.path, 'learn_local_dbn.R', sep = '/'))
 
 source(paste(init.path, 'calcPerfDiNet.R', sep = '/'))
 # source(paste(init.path, 'learnCmiNetStruct.R', sep = '/'))
@@ -495,10 +506,35 @@ if ((clr.algo == 'CLR') | (clr.algo == 'CLR2') | (clr.algo == 'CLR2.1')) {
 unrolled.DBN.adj.matrix.list <- NULL
 
 if ((clr.algo == 'CLR') | (clr.algo == 'CLR2') | (clr.algo == 'CLR2.1')) {
-  unrolled.DBN.adj.matrix.list <- learnDbnStructMo1Layer3dParDeg1_v2(input.data.discr.3D, mi.net.adj.matrix, 
-                                                                     num.discr.levels, num.nodes, num.timepts, 
-                                                                     max.fanin, node.names, clr.algo)
+  
+  if (use.lite) {
+    ## source(paste(init.path, 'learn_dbn_struct_3d_par_deg1.R', sep = '/'))
+    unrolled.DBN.adj.matrix.list <- LearnDbnStructMo1Layer3dParDeg1_v2_Lite(input.data.discr.3D, 
+                                                                            mi.net.adj.matrix, 
+                                                                            num.discr.levels, 
+                                                                            num.nodes, 
+                                                                            num.timepts, 
+                                                                            max.fanin, 
+                                                                            node.names, 
+                                                                            clr.algo, 
+                                                                            auto.reg.order, 
+                                                                            scoring.func)
+  } else {
+    ## source(paste(init.path, 'learn_dbn_struct_3d_par_deg1.R', sep = '/'))
+    unrolled.DBN.adj.matrix.list <- LearnDbnStructMo1Layer3dParDeg1_v2(input.data.discr.3D, 
+                                                                       mi.net.adj.matrix, 
+                                                                       num.discr.levels, 
+                                                                       num.nodes, 
+                                                                       num.timepts, 
+                                                                       max.fanin, 
+                                                                       node.names, 
+                                                                       clr.algo)
+    
+  }
+  
   rm(mi.net.adj.matrix)
+  
+
   
 } else if (clr.algo == 'CLR3') {
   
