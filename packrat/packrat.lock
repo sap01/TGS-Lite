@@ -1,6 +1,6 @@
 PackratFormat: 1.4
 PackratVersion: 0.4.9.3
-RVersion: 3.5.0
+RVersion: 3.5.1
 Repos: CRAN=https://cran.rstudio.com/
 
 Package: BiocGenerics
@@ -12,6 +12,12 @@ Package: BiocInstaller
 Source: Bioconductor
 Version: 1.30.0
 Hash: b7e53989dbab5dc09626192456e7abc9
+
+Package: Matrix
+Source: CRAN
+Version: 1.2-14
+Hash: 521aa8772a1941dfdb007bf532d19dde
+Requires: lattice
 
 Package: R6
 Source: CRAN
@@ -39,7 +45,7 @@ Package: RcppEigen
 Source: CRAN
 Version: 0.3.3.4.0
 Hash: cd74284fa0023feb87f8f606b6486c6b
-Requires: Rcpp
+Requires: Matrix, Rcpp
 
 Package: Rgraphviz
 Source: Bioconductor
@@ -67,12 +73,17 @@ Package: bnstruct
 Source: CRAN
 Version: 1.0.2
 Hash: 5712f9964f9e9a6154664050d254d431
-Requires: bitops, igraph
+Requires: Matrix, bitops, igraph
 
 Package: catnet
 Source: CRAN
 Version: 1.15.3
 Hash: dc1e42aa1c564589a959c29e9dd394dd
+
+Package: codetools
+Source: CRAN
+Version: 0.2-15
+Hash: a4268e48f71dc70ac2203aced7cdd8ea
 
 Package: curl
 Source: CRAN
@@ -107,7 +118,7 @@ Package: foreach
 Source: CRAN
 Version: 1.4.4
 Hash: 4df5ab2c8c35382dacab75d414da6748
-Requires: iterators
+Requires: codetools, iterators
 
 Package: functional
 Source: CRAN
@@ -125,7 +136,8 @@ Package: gRbase
 Source: CRAN
 Version: 1.8-3.1
 Hash: a00ac00b83e8607d78d3e9c60d940450
-Requires: RBGL, Rcpp, RcppArmadillo, RcppEigen, graph, igraph, magrittr
+Requires: Matrix, RBGL, Rcpp, RcppArmadillo, RcppEigen, graph, igraph,
+    magrittr
 
 Package: ggm
 Source: CRAN
@@ -154,7 +166,7 @@ Package: igraph
 Source: CRAN
 Version: 1.2.1
 Hash: a979d42385efda8e8aca7882a296ab50
-Requires: magrittr, pkgconfig
+Requires: Matrix, magrittr, pkgconfig
 
 Package: infotheo
 Source: CRAN
@@ -170,6 +182,11 @@ Package: jsonlite
 Source: CRAN
 Version: 1.5
 Hash: 9c51936d8dd00b2f1d4fe9d10499694c
+
+Package: lattice
+Source: CRAN
+Version: 0.20-35
+Hash: 26b9d7f0d0cb4e1d1bbb97f867c82d89
 
 Package: magrittr
 Source: CRAN
