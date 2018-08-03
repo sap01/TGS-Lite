@@ -125,7 +125,7 @@ LearnDbnStructMo1Layer3dParDeg1_v2_Lite <- function(input.data.discr.3D,
                                                               tgt.node.name, ]
       rm(col.name)
       
-      ## source(paste(init.path, 'learn_local_bayes_net.R', sep = '/'))
+      ## source(paste(init.path, 'learn_local_dbn.R', sep = '/'))
       ## Returns the list of predicted source nodes for the local DBN.
       local.dbn.pred.src.nodes <- LearnLocalDbn(local.DBN.input.data, 
                                                 scoring.func)
