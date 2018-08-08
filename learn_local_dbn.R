@@ -143,6 +143,9 @@ LearnLocalDbn <- function(local.dbn.input.data,
         stop('Only supports BIC scoring function till now')
       }
       
+      ## The higher the score, the better.
+      ## Ref: Section 'Note' of function 'score' in the manual of 
+      ## R package 'bnlearn' version 4.3.
       if (curr.score > best.score) {
         best.score <- curr.score
         best.subset.str <- curr.subset.str
@@ -157,6 +160,14 @@ LearnLocalDbn <- function(local.dbn.input.data,
   ########################################################################
   ## End: Find out the subset of source nodes with the best score
   ########################################################################
+  
+  ## Predicted source node names  
+  pred.src.node.names <- sl.src.node.names[unlist(best.subset.str)]
+  rm(sl.src.node.names)
+  pred.src.node.names <- as.list(pred.src.node.names)
+  
+  ## Return the list of predicted source node names    
+  return(pred.src.node.names)  
 }
 
 #######################################################################################

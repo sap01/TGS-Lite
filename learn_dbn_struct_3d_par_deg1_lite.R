@@ -124,91 +124,41 @@ LearnDbnStructMo1Layer3dParDeg1_v2_Lite <- function(input.data.discr.3D,
       local.DBN.input.data[, col.name] <- input.data.discr.3D[(time.trans.idx + auto.reg.order), 
                                                               tgt.node.name, ]
       rm(col.name)
+      ## End: Generate 2D 'local.DBN.input.data' from 'local.input.data.3D'
+      
+      print('before data frame')
+      local.DBN.input.data <- as.data.frame(local.DBN.input.data)
       
       ## source(paste(init.path, 'learn_local_dbn.R', sep = '/'))
       ## Returns the list of predicted source nodes for the local DBN.
+      print('before LearnLocalDbn()')
       local.dbn.pred.src.nodes <- LearnLocalDbn(local.DBN.input.data, 
                                                 scoring.func)
-      
-      ## If the predicted source node set is an empty set
-      if (length(local.dbn.pred.src.nodes) == 0) {
-        
-      } else {
-        
-      }
-      
-      ################################################################################################
-      
-      ## End: Generate 2D 'local.DBN.input.data' from 'local.input.data.3D'
-      # save(local.DBN.input.data, file = 'local.DBN.input.data.RData')
-      local.DBN.input.data.BNDataset <- bnstruct::BNDataset(local.DBN.input.data,
-                                                            discreteness = rep(TRUE, ncol(local.DBN.input.data)),
-                                                            variables = colnames(local.DBN.input.data),
-                                                            node.sizes = rep(num.discr.levels, 
-                                                                             ncol(local.DBN.input.data)))
-      
-      ## algo = "sm", scoring.func = "BIC", with layering
-      ## There are two time pts. represented by c(time.trans.idx, time.trans.idx + 1).
-      ## The nodes belonging to these time pts. are labeled with layer idx 1 and 2, resp.
-      ## A node with layer idx j can have parents from layer idx i such that i =< j.
-      layers <- c(rep(1, (ncol(local.DBN.input.data) - 1)), 2)
-      local.unrolled.DBN <-  bnstruct::learn.network(local.DBN.input.data.BNDataset,
-                                                     algo = 'sm',
-                                                     scoring.func = 'BIC',
-                                                     layering = layers)
-      rm(layers)
-      
-      # # The following four lines must be executed at the same time
-      # save.plot.to.filename = paste(paste('LocalUnrolledDbn', tgt.node.name, sep = '_'), '.jpg', sep = '')
-      # jpeg(file = paste('LocalUnrolledDbn_', tgt.node.name, '.jpg', sep = ''))
-      # plot(local.unrolled.DBN)
-      # dev.off()
-      
-      # Extracting the adjacency matrix of the local DBN
-      local.unrolled.DBN.adj.matrix <- bnstruct::dag(local.unrolled.DBN)
-      local.unrolled.DBN.adj.matrix <- matrix(local.unrolled.DBN.adj.matrix,
-                                              nrow = length(local.unrolled.DBN@variables),
-                                              ncol = length(local.unrolled.DBN@variables),
-                                              dimnames = c(list(local.unrolled.DBN@variables), list(local.unrolled.DBN@variables)))
-      
-      # This for loop checks whether parents are learnt only for 'local.unrolled.DBN.tgt.node.name'. If
-      # so, then nothing is printed. Otherwise, prints the column(s) corr. to the undesired tgt node(s).
-      for (col.idx in 1:(ncol(local.unrolled.DBN.adj.matrix) - 1))
-      {
-        if (sum(local.unrolled.DBN.adj.matrix[, col.idx]) > 0)
-        {
-          print('Erroneous column')
-          print(local.unrolled.DBN.adj.matrix[, col.idx])
-        }
-      }
-      
-      # End: Uncomment this section after testing
-      
-      # # Begin: This section is for testing    
-      # local.unrolled.DBN.adj.matrix <- matrix(0, 
-      #                                         nrow = ncol(local.DBN.input.data),
-      #                                         ncol = ncol(local.DBN.input.data),
-      #                                         dimnames = list(colnames(local.DBN.input.data), colnames(local.DBN.input.data))) 
-      # # End: This section is for testing
-      
-      # 'fixed = FALSE' represents that the given pattern is a regular expression.
-      # local.unrolled.DBN.central.node.indices <- grep(paste('^', tgt.node.name, sep = ''),
-      #                                                 colnames(local.unrolled.DBN.adj.matrix),
-      #                                                 fixed = FALSE)
-      # Assuming there are > 1 time points. Otherwise, 'local.unrolled.DBN.adj.submatrix' would become a vector.
-      # local.unrolled.DBN.adj.submatrix <- local.unrolled.DBN.adj.matrix[, local.unrolled.DBN.central.node.indices]
+      print('after LearnLocalDbn()')
       
       ## Assuming there are > 1 time points. Otherwise, 'local.unrolled.DBN.adj.submatrix' would become a vector.
-      local.unrolled.DBN.adj.submatrix <- matrix(
-        local.unrolled.DBN.adj.matrix[local.unrolled.DBN.src.node.names, local.unrolled.DBN.tgt.node.name],
-        nrow = length(local.unrolled.DBN.src.node.names),
-        ncol = 1,
-        dimnames = c(list(local.unrolled.DBN.src.node.names), list(local.unrolled.DBN.tgt.node.name)))
+      ## Initialize the sub-matrix with zeroes.
+      local.unrolled.DBN.adj.submatrix <- matrix(0, 
+                                                 nrow = length(local.unrolled.DBN.src.node.names), 
+                                                 ncol = 1, 
+                                                 dimnames = c(list(local.unrolled.DBN.src.node.names), 
+                                                              list(local.unrolled.DBN.tgt.node.name)))
       
       # print(local.unrolled.DBN.adj.submatrix)
+      
+      ## Only if the predicted source node set is non-empty
+      if (length(local.dbn.pred.src.nodes) > 0) {
+        for (src.node.name in local.dbn.pred.src.nodes) {
+          local.unrolled.DBN.adj.submatrix[src.node.name, local.unrolled.DBN.tgt.node.name] <- 1
+        }
+        rm(src.node.name)
+      }
+      
       #---------------------------------
       # End: Local Unrolled DBN struct learning
       #---------------------------------
+      
+      print(local.unrolled.DBN.adj.submatrix)
       
       # Return value for each 'foreach' iteration 
       local.unrolled.DBN.adj.submatrix
