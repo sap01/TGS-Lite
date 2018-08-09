@@ -126,8 +126,8 @@ LearnDbnStructMo1Layer3dParDeg1_v2_Lite <- function(input.data.discr.3D,
       rm(col.name)
       ## End: Generate 2D 'local.DBN.input.data' from 'local.input.data.3D'
       
-      print('before data frame')
-      local.DBN.input.data <- as.data.frame(local.DBN.input.data)
+      # print('before data frame')
+      # local.DBN.input.data <- as.data.frame(local.DBN.input.data)
       
       ## source(paste(init.path, 'learn_local_dbn.R', sep = '/'))
       ## Returns the list of predicted source nodes for the local DBN.

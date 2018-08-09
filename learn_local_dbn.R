@@ -64,6 +64,19 @@ LearnLocalDbn <- function(local.dbn.input.data,
   ## Initialize the current score
   curr.score <- NULL
   
+  local.dbn.input.data <- as.data.frame(local.dbn.input.data)
+  
+  ## Convert each column from int to factor
+  for (col.idx in 1:ncol(local.dbn.input.data)) {
+    local.dbn.input.data[, col.idx] <- as.factor(local.dbn.input.data[, col.idx])
+  }
+  rm(col.idx)
+  
+  print(local.dbn.input.data)
+  print(str(local.dbn.input.data))
+  
+  print('before empty subset')
+  
     ########################################################################  
     ## Begin: Calc score of the empty subset
     ########################################################################
@@ -80,6 +93,8 @@ LearnLocalDbn <- function(local.dbn.input.data,
   
   best.score <- curr.score
   best.subset.str <- curr.subset.str
+  
+  print('after empty subset')
   
     ########################################################################  
     ## Begin: Calc scores of the non-empty subsets
@@ -143,7 +158,7 @@ LearnLocalDbn <- function(local.dbn.input.data,
         stop('Only supports BIC scoring function till now')
       }
       
-      ## The higher the score, the better.
+      ## The higher the score, the fitter the model.
       ## Ref: Section 'Note' of function 'score' in the manual of 
       ## R package 'bnlearn' version 4.3.
       if (curr.score > best.score) {
