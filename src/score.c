@@ -193,10 +193,20 @@ SEXP all_fam_log_marg_lik( SEXP data, SEXP node_sizes, SEXP imp_fam_mask, SEXP i
 		for( j = 0; j < pow_nodes; j++ ) {
 			pos = j*n_nodes + i;
 			if( ifm[pos] ) {
+				/* 
+				 * 'n_pa' = No. of parents of node 'i'.
+				 * 'pa' = Arr of node indices of parents in the j^th parent set. 
+				 * k^th elt of the arr contains node index of the k^th parent. 
+				 * The first 'n_pa' number of 
+				 * elts. contain node indices of parents.
+				 */
 				// Rprintf("get bits\n");
 				n_pa = get_bits( j, pa, n_nodes );
-			  
-			  // Calc score when the i-th node is parented by the j-th parent set?
+
+			  /*
+			   * Calc score when the i-th node is parented by the j-th parent set.
+			   * The j^th parent set is represented by 'pa'.
+			   */			  
 				// Rprintf("log lik, node %d, n parents %d\n",i,n_pa);
 				aflml[pos] = score_node_1(d, n_nodes, n_ex, ns, i, pa, n_pa, scoring_func, alpha);
         // bdeu_score( d, n_nodes, n_ex, ns, i, pa, n_pa, alpha );
@@ -208,12 +218,55 @@ SEXP all_fam_log_marg_lik( SEXP data, SEXP node_sizes, SEXP imp_fam_mask, SEXP i
 	return result;	
 }
 
-unsigned int get_bits( unsigned int word, unsigned int * bits, unsigned int size )
-{
+/* 
+ * Input:
+ * 'word': Parent set index in decimal.
+ * 'bits':  Unsigned int dyn arr of length total no. of nodes in the data. 
+ * 'size': Number of noeds in the data.
+ * 
+ * Output:
+ * Returns 'count': No. of parents.
+ * Modifies 'bits': Arr of node indices of parents. i^th elt of the arr
+ * contains node index of the i^th parent. The first 'count' number of 
+ * elts. contain node indices of parents.
+ */
+unsigned int get_bits( unsigned int word, unsigned int * bits, unsigned int size ) {
 	unsigned int i, count = 0, bitmask = 1;
-	for( i = 0; i < size; i++ )
-		if( word & bitmask<<i )
-			bits[count++] = i;
+	for( i = 0; i < size; i++ ) {
+	  
+	  /* 
+	   * Bit-wise binary AND, and
+	   * bit-wise binary 'i' no. of left-shifts.
+	   * Does not modify 'bitmask'.
+	   */
+	  if( word & bitmask<<i ) {
+	    bits[count++] = i;
+	  }
+	}
 	
 	return count;
 }
+
+double score_node_1( int* data, int ncols_data, int nrows_data, int* node_sizes, unsigned int ni, int* pars, int length_pars, int func, double ess )
+{
+  double score;
+  
+  switch (func)
+  {
+  case 0 : score = bdeu_score( data, ncols_data, nrows_data, node_sizes,
+                               ni, pars, length_pars, ess );
+    break;
+    
+  case 1 : score = log_likelihood( data, ncols_data, nrows_data, node_sizes,
+                                   ni, pars, length_pars, 0.5*log(nrows_data) );
+    break;
+    
+  case 2 : score = log_likelihood( data, ncols_data, nrows_data, node_sizes,
+                                   ni, pars, length_pars, 1.0 );
+    break;
+  }
+  
+  return score;
+}
+
+
