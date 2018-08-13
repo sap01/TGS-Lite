@@ -196,6 +196,8 @@ source(paste(init.path, 'learn_dbn_struct_3d_par_deg1.R', sep = '/'))
 
 source(paste(init.path, 'learn_dbn_struct_3d_par_deg1_lite.R', sep = '/'))
 source(paste(init.path, 'learn_local_dbn.R', sep = '/'))
+source(paste(init.path, 'score_bn.R', sep = '/'))
+dyn.load(paste(init.path, 'src/score_bn.so', sep = '/'))
 
 source(paste(init.path, 'calcPerfDiNet.R', sep = '/'))
 # source(paste(init.path, 'learnCmiNetStruct.R', sep = '/'))

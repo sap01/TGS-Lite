@@ -75,8 +75,6 @@ LearnLocalDbn <- function(local.dbn.input.data,
   print(local.dbn.input.data)
   print(str(local.dbn.input.data))
   
-  print('before empty subset')
-  
     ########################################################################  
     ## Begin: Calc score of the empty subset
     ########################################################################
@@ -93,8 +91,6 @@ LearnLocalDbn <- function(local.dbn.input.data,
   
   best.score <- curr.score
   best.subset.str <- curr.subset.str
-  
-  print('after empty subset')
   
     ########################################################################  
     ## Begin: Calc scores of the non-empty subsets
