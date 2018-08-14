@@ -1,6 +1,195 @@
 ## Goal: Learn local Dynamic Bayesian Network (DBN)
 ##
-LearnLocalDbn <- function(local.dbn.input.data, 
+#######################################################################################
+## Goal: Learn local DBN using R package 'bnstruct'.
+## This function allows nodes with less than two discrete levels.
+#######################################################################################
+LearnLocalDbnBnstruct <- function(local.dbn.input.data, 
+                                 scoring.func) {
+  
+  ## Number of nodes in the local DBN
+  num.nodes.local.dbn <- ncol(local.dbn.input.data)
+  
+  ## E.g., [1] "v1_t2" 
+  tgt.node.name <- colnames(local.dbn.input.data)[ncol(local.dbn.input.data)]
+  
+  ## Number of shortlisted source nodes.
+  ## The last col is for the target node.
+  num.sl.src.nodes <- (ncol(local.dbn.input.data) - 1) 
+  
+  ## E.g., [1] "v1_t1" "v2_t1" "v3_t1"
+  sl.src.node.names <- colnames(local.dbn.input.data)[1:num.sl.src.nodes]
+  
+  ########################################################################
+  ## Begin: Find out the subset of source nodes with the best score
+  ########################################################################
+  
+  ## Begin with the empty subset
+  # curr.subset <- c()
+  curr.subset.str <- as.list(rep(FALSE, num.sl.src.nodes))
+  
+  ########################################################################
+  ## Begin: Compose model string for the source nodes
+  ########################################################################
+  src.model.str <- c()
+  
+  for (node.name in sl.src.node.names) {
+    node.to.add <- paste('[', 
+                         node.name, 
+                         ']', 
+                         sep = '')
+    
+    src.model.str <- paste(src.model.str, 
+                           node.to.add, 
+                           sep = '')
+  }
+  rm(node.name)
+  ##> 'src.model.str' = '[v1_t1][v2_t1][v3_t1]'
+  ########################################################################
+  ## End: Compose model string for the source nodes
+  ########################################################################
+  
+  ## Model string for the target node
+  tgt.model.str <- paste('[', 
+                         tgt.node.name, 
+                         ']', 
+                         sep = '')
+  ##> 'tgt.model.str' = '[v1_t2]'
+  
+  ## Current model string
+  curr.model.str <- paste(src.model.str, 
+                          tgt.model.str, 
+                          sep = '')
+  ##> 'curr.model.str' = '[v1_t1][v2_t1][v3_t1][v1_t2]'
+  
+  ## Current network model
+  curr.net <- bnlearn::model2network(curr.model.str)
+  
+  ## Initialize the current score
+  curr.score <- NULL
+  
+  local.dbn.input.data <- as.data.frame(local.dbn.input.data)
+  
+  ## Convert each column from int to factor
+  for (col.idx in 1:ncol(local.dbn.input.data)) {
+    local.dbn.input.data[, col.idx] <- as.factor(local.dbn.input.data[, col.idx])
+  }
+  rm(col.idx)
+  
+  print(local.dbn.input.data)
+  print(str(local.dbn.input.data))
+  
+  ########################################################################  
+  ## Begin: Calc score of the empty subset
+  ########################################################################
+  if (scoring.func == 'BIC') {
+    curr.score <- bnlearn::score(curr.net, 
+                                 local.dbn.input.data, 
+                                 type = 'bic')
+  } else {
+    stop('Only supports BIC scoring function till now')
+  }
+  ########################################################################
+  ## End: Calc score of the empty subset
+  ########################################################################
+  
+  best.score <- curr.score
+  best.subset.str <- curr.subset.str
+  
+  ########################################################################  
+  ## Begin: Calc scores of the non-empty subsets
+  ########################################################################
+  
+  num.subsets <- (2^num.sl.src.nodes)
+  
+  for (subset.idx in 2:num.subsets) {
+    
+    ## 'find.next.subset.str()' is defined in this script
+    curr.subset.str <- find.next.subset.str(curr.subset.str)
+    ##> 'curr.subset.str' = list(TRUE, FALSE, TRUE)
+    
+    ## Model string for the target node
+    tgt.model.str <- paste('[', 
+                           tgt.node.name, 
+                           '|', 
+                           sep = '')
+    ##> 'tgt.model.str' = '[v1_t2|'
+    
+    is.first <- TRUE
+    
+    for (node.idx in length(curr.subset.str)) {
+      if (curr.subset.str[[node.idx]]) {
+        
+        if (is.first) {
+          is.first <- FALSE
+          
+        } else {
+          tgt.model.str <- paste(tgt.model.str, 
+                                 ':', 
+                                 sep = '')
+        }
+        
+        tgt.model.str <- paste(tgt.model.str, 
+                               sl.src.node.names[node.idx], 
+                               sep = '')
+      }
+    }
+    rm(node.idx)
+    
+    tgt.model.str <- paste(tgt.model.str, 
+                           ']',
+                           sep = '')
+    ##> tgt.model.str = '[v1_t2|v1_t1:v1_t3]'
+    
+    ## Current model string
+    curr.model.str <- paste(src.model.str, 
+                            tgt.model.str, 
+                            sep = '')
+    ##> 'curr.model.str' = '[v1_t1][v2_t1][v3_t1][v1_t2|V1_t1:v1_t3]'
+    
+    ## Current network model
+    curr.net <- bnlearn::model2network(curr.model.str)
+    
+    if (scoring.func == 'BIC') {
+      curr.score <- bnlearn::score(curr.net, 
+                                   local.dbn.input.data, 
+                                   type = 'bic')
+    } else {
+      stop('Only supports BIC scoring function till now')
+    }
+    
+    ## The higher the score, the fitter the model.
+    ## Ref: Section 'Note' of function 'score' in the manual of 
+    ## R package 'bnlearn' version 4.3.
+    if (curr.score > best.score) {
+      best.score <- curr.score
+      best.subset.str <- curr.subset.str
+    }
+    
+  }
+  rm(subset.idx, num.subsets)
+  ########################################################################
+  ## End: Calc scores of the non-empty subsets
+  ########################################################################    
+  
+  ########################################################################
+  ## End: Find out the subset of source nodes with the best score
+  ########################################################################
+  
+  ## Predicted source node names  
+  pred.src.node.names <- sl.src.node.names[unlist(best.subset.str)]
+  rm(sl.src.node.names)
+  pred.src.node.names <- as.list(pred.src.node.names)
+  
+  ## Return the list of predicted source node names    
+  return(pred.src.node.names)  
+}
+
+#######################################################################################
+## Goal: Learn local DBN using R package 'bnlearn'.
+## This function requires that each node has at least two discrete levels.
+#######################################################################################
+LearnLocalDbnBnlearn <- function(local.dbn.input.data, 
                                scoring.func) {
   
   ## Number of nodes in the local DBN

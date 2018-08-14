@@ -1,4 +1,8 @@
 /*
+ * Goal: Calc score of a given Bayesian
+ * network w.r.t. a given scoring 
+ * function.
+ * 
  * This source code draws heavily from
  * that of R package 'bnstruct'
  * version 1.0.2
@@ -15,6 +19,7 @@
 #include <R.h>
 #include <Rinternals.h>
 #include <math.h>
+// #include <errno.h>
 
 /* =================================================================================== */
 /* 
@@ -52,8 +57,7 @@ unsigned int get_bits( unsigned int word, unsigned int * bits, unsigned int size
  * |B| = \sum_{i=1}^{|V|} (r_i - 1) * q_i
  */
 double log_likelihood ( unsigned int * d, unsigned int n_nodes, unsigned int n_cases, unsigned int * ns, 
-                        unsigned int ni, unsigned int * pa, unsigned int n_pa, double penalty )
-{
+                        unsigned int ni, unsigned int * pa, unsigned int n_pa, double penalty ) {
   int i, j, index, elmt, stride;
   double acc, logl;
   
@@ -78,12 +82,10 @@ double log_likelihood ( unsigned int * d, unsigned int n_nodes, unsigned int n_c
   double * counts = calloc( prod_sizes, sizeof(double) ); 
   
   // compute counts, skipping NAs
-  for( i = 0; i < n_cases; i++ )
-  {
+  for( i = 0; i < n_cases; i++ ) {
     index = 0;
     // sum using strides
-    for( j = 0; j < n_pa + 1; j++ )
-    {
+    for( j = 0; j < n_pa + 1; j++ ) {
       elmt = d[ i + strides[j] ];
       if( elmt == NA_INTEGER )
         //{
@@ -91,13 +93,16 @@ double log_likelihood ( unsigned int * d, unsigned int n_nodes, unsigned int n_c
         break;
       //}
       index += (elmt - 1) * cum_prod_sizes[j];
+      // Rprintf("after index+\n");
     }
     // check if NA encountered
     if( j < n_pa + 1 )
       continue;
     
-    counts[index] += 1;			
+    counts[index] += 1;	
+    // Rprintf("i = %d,\tj = %d\n", i, j);
   }
+  // Rprintf("after loop\n");
   
   // correct for NAs
   //for( i = 0; i < prod_sizes; i++ )
@@ -127,19 +132,18 @@ double log_likelihood ( unsigned int * d, unsigned int n_nodes, unsigned int n_c
   
   logl -= penalty * prod_sizes_pa * (ns[ni] - 1);
   
-  free( counts );
+  free(counts);
+  // Rprintf("after free");
   
   return logl;
 }
 
 /* =================================================================================== */
 double score_node_1( int* data, int ncols_data, int nrows_data, int* node_sizes, 
-                     int ni, int* pars, int length_pars, int func)
-{
+                     int ni, int* pars, int length_pars, int func) {
   double score;
   
-  switch (func)
-  {
+  switch (func) {
     /* 
      * Only BIC scoring function is allowed till now
      */
@@ -155,9 +159,13 @@ double score_node_1( int* data, int ncols_data, int nrows_data, int* node_sizes,
      
      */
     
-  case 2 : score = log_likelihood( data, ncols_data, nrows_data, node_sizes,
+  case 2: // Rprintf("before ll\n");
+    score = log_likelihood( data, ncols_data, nrows_data, node_sizes,
                                    ni, pars, length_pars, 1.0 );
+    // Rprintf("after ll\n");
     break;
+  // default: Rprintf("Only supports BIC scoring function till now.\n");
+  // exit(EXIT_FAILURE);
   }
   
   return score;
@@ -168,13 +176,14 @@ double score_node_1( int* data, int ncols_data, int nrows_data, int* node_sizes,
  * aflml <- .Call("all_fam_log_marg_lik_v2", data, node.sizes, scoring.func)
  */
 SEXP all_fam_log_marg_lik_v2(SEXP data, SEXP node_sizes, SEXP func, 
-                             SEXP tgt_node_idx, SEXP src_node_idx) {
+                             SEXP tgt_node_idx, SEXP src_node_idx, 
+                             SEXP num_src_nodes) {
   
   // unsigned int i,j,n_pa,pos;
   
   // Begin: Get inputs
   unsigned int * d = INTEGER(data);
-  printf("d\n");
+  // Rprintf("d\n");
   
   unsigned int n_nodes = ncols(data);
   
@@ -182,7 +191,7 @@ SEXP all_fam_log_marg_lik_v2(SEXP data, SEXP node_sizes, SEXP func,
   unsigned int n_ex = nrows(data);	 
   
   unsigned int * ns = INTEGER(node_sizes);
-  printf("ns\n");
+  // Rprintf("ns\n");
   // Impossible family mask
   // unsigned int * ifm = INTEGER(imp_fam_mask);
   // unsigned int pow_nodes = ncols(imp_fam_mask);
@@ -195,15 +204,15 @@ SEXP all_fam_log_marg_lik_v2(SEXP data, SEXP node_sizes, SEXP func,
   * 2 for BIC
   */
   unsigned int scoring_func = *INTEGER(func);
-  printf("scoring_func\n");
+  // Rprintf("scoring_func\n");
   
   int tgt = *INTEGER(tgt_node_idx);
-  printf("tgt\n");
+  // Rprintf("tgt\n");
   
   int * pa = INTEGER(src_node_idx);
-  printf("pa\n");
+  // Rprintf("pa\n");
   
-  int n_pa = (n_nodes - 1);
+  int n_pa = *INTEGER(num_src_nodes);
   
   // unsigned int * pa = (unsigned int *) R_alloc( n_nodes, sizeof(unsigned int) );
   // End: Get inputs
@@ -216,9 +225,14 @@ SEXP all_fam_log_marg_lik_v2(SEXP data, SEXP node_sizes, SEXP func,
   // for( i = 0; i < n_nodes*pow_nodes; i++ )
   // aflml[i] = R_NegInf;
   
+  // Rprintf("before score\n");
+  
   // compute log likelihood
-  REAL(result)[0] = score_node_1(d, n_nodes, n_ex, ns, tgt, pa, 
-       n_pa, scoring_func);
+  // REAL(result)[0] = -12.2932;
+  REAL(result)[0] = score_node_1(d, n_nodes, n_ex, ns, tgt, pa, n_pa, scoring_func);
+  
+  // Rprintf("after score\n");
+  // Rprintf("%f\n", REAL(result)[0]);
   
   // compute log likelihood
   // for( i = 0; i < n_nodes; i++ )

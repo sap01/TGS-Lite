@@ -1,7 +1,8 @@
 ## This function is a wrapper function for calling
 ## 'all_fam_log_marg_lik_v2()' in 'src/score_bn.c'
 ##
-ScoreBn <- function(local.dbn.input.data, node.sizes, scoring.func, tgt.node.idx, src.node.idx) {
+ScoreBn <- function(local.dbn.input.data, node.sizes, scoring.func, 
+                    tgt.node.idx, src.node.idx, num.src.nodes) {
   
   num.nodes <- ncol(local.dbn.input.data)
   levels <- rep(0, num.nodes)
@@ -13,9 +14,11 @@ ScoreBn <- function(local.dbn.input.data, node.sizes, scoring.func, tgt.node.idx
   storage.mode(scoring.func) <- "integer"
   storage.mode(tgt.node.idx) <- "integer"
   storage.mode(src.node.idx) <- "integer"
+  storage.mode(num.src.nodes) <- "integer"
   
-  result <- .Call('all_fam_log_marg_lik_v2', q.data, node.sizes, scoring.func, 
-                  tgt.node.idx, src.node.idx)
+  result <- .Call('all_fam_log_marg_lik_v2', q.data, node.sizes, 
+                  scoring.func, tgt.node.idx, src.node.idx, 
+                  num.src.nodes)
   return(result)
 }
 
