@@ -9,3 +9,6 @@ asset/DREAM3GoldStandard*.RData
 
 ## Output directories
 asset/output*/
+
+## Packrat bundles
+packrat/bundles/
