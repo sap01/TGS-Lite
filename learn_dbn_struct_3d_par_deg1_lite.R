@@ -131,10 +131,9 @@ LearnDbnStructMo1Layer3dParDeg1_v2_Lite <- function(input.data.discr.3D,
       
       ## source(paste(init.path, 'learn_local_dbn.R', sep = '/'))
       ## Returns the list of predicted source nodes for the local DBN.
-      print('before LearnLocalDbn()')
-      local.dbn.pred.src.nodes <- LearnLocalDbn(local.DBN.input.data, 
-                                                scoring.func)
-      print('after LearnLocalDbn()')
+      local.dbn.pred.src.nodes <- LearnLocalDbnBnstruct(local.DBN.input.data, 
+                                                        rep(num.discr.levels, ncol(local.DBN.input.data)), 
+                                                        scoring.func)
       
       ## Assuming there are > 1 time points. Otherwise, 'local.unrolled.DBN.adj.submatrix' would become a vector.
       ## Initialize the sub-matrix with zeroes.

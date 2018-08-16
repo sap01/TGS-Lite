@@ -9,6 +9,13 @@ ScoreBn <- function(local.dbn.input.data, node.sizes, scoring.func,
   q.data <- quantize.matrix(local.dbn.input.data, levels)
   rm(num.nodes, levels)
   
+  ## Since C index starts from zero
+  tgt.node.idx <- (tgt.node.idx - 1)
+  
+  ## Since C index starts from zero.
+  ## One would be deducted from each elt.
+  src.node.idx <- (src.node.idx - 1)
+  
   ## just to be sure
   storage.mode(node.sizes) <- "integer" 
   storage.mode(scoring.func) <- "integer"
