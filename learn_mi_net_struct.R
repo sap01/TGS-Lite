@@ -186,8 +186,7 @@ LearnClrNetFromDiscrData <- function(input.data.discr, num.nodes, node.names)
 ## and remove rest of the edges. Tie is broken in favour of the neighbour having smaller node index.
 ## If there are less than that number of edges for a node, then retain all its neighbours.
 
-LearnClrNetMfi <- function(mut.info.matrix, mi.net.adj.matrix, num.nodes, max.fanin, output.dirname)
-{
+LearnClrNetMfi <- function(mut.info.matrix, mi.net.adj.matrix, num.nodes, max.fanin, output.dirname) {
   ##------------------------------------------------------------
   ## Begin: Load the Required Libraries
   ##------------------------------------------------------------
@@ -206,16 +205,14 @@ LearnClrNetMfi <- function(mut.info.matrix, mi.net.adj.matrix, num.nodes, max.fa
   save(mi.net.adj.matrix.wt, file = paste(output.dirname, 'mi.net.adj.matrix.wt.RData', sep = '/'))
 
   # For each target node
-  for (col.idx in 1:num.nodes)
-  {
+  for (col.idx in 1:num.nodes) {
     # Weights of the edges with the target node
     edge.wts <- mi.net.adj.matrix.wt[, col.idx]
     
     # Count number of neighbours having positive edge weight
     num.nbrs <- length(edge.wts[edge.wts > 0])
     
-    if (num.nbrs >= max.fanin)
-    {
+    if (num.nbrs >= max.fanin) {
       # Return indices of the top 'max.fanin' number of neighbours w.r.t. edge weight.
       # Tie is broken in favour of the neighbour having smaller index.
       valid.nbrs <- sort(edge.wts, decreasing = TRUE, index.return = TRUE)$ix[1:max.fanin]
@@ -225,9 +222,7 @@ LearnClrNetMfi <- function(mut.info.matrix, mi.net.adj.matrix, num.nodes, max.fa
       ## The following line is not required since 'mi.net.adj.matrix' is initialized
       ## with all zeroes
       # mi.net.adj.matrix[-(valid.nbrs), col.idx] <- 0
-    }
-    else if (num.nbrs < max.fanin)
-    {
+    } else if (num.nbrs < max.fanin) {
       # Retain all the neighbours
       mi.net.adj.matrix[edge.wts > 0, col.idx] <- 1
     }

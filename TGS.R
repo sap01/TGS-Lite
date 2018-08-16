@@ -272,11 +272,18 @@ colnames(input.data) <- node.names
 
 num.nodes <- ncol(input.data)
 
-## Max fanin must be restricted to 14. Because, it is empirically observed that bnstruct::learn.network()
+## For vanilla TGS, 
+## max fanin must be restricted to 14. Because, it is empirically observed that bnstruct::learn.network()
 ## function can learn a BN with upto 15 nodes without segmentation fault, given a 32 GB main memory. A max 
 ## fanin restriction of 14 limits the number of nodes in the to-be-learnt BN to 15 (1 target node and a 
 ## maximum of 14 candidate parents).
-max.fanin <- min(num.nodes, 14)
+# max.fanin <- min(num.nodes, 14)
+## For TGS-Lite, 
+## the abovementioned restriction is not required.
+if (max.fanin == 'none') {
+  max.fanin <- num.nodes
+}
+## Else 'max.fanin' takes the user-defined value
 
 num.samples.per.timept <- (nrow(input.data) / num.timepts)
 
@@ -510,13 +517,13 @@ unrolled.DBN.adj.matrix.list <- NULL
 if ((clr.algo == 'CLR') | (clr.algo == 'CLR2') | (clr.algo == 'CLR2.1')) {
   
   if (use.lite) {
-    ## source(paste(init.path, 'learn_dbn_struct_3d_par_deg1.R', sep = '/'))
+    ## source(paste(init.path, 'learn_dbn_struct_3d_par_deg1_lite.R', sep = '/')).
+    ## Param 'max.fanin' is not required for this function.
     unrolled.DBN.adj.matrix.list <- LearnDbnStructMo1Layer3dParDeg1_v2_Lite(input.data.discr.3D, 
                                                                             mi.net.adj.matrix, 
                                                                             num.discr.levels, 
                                                                             num.nodes, 
                                                                             num.timepts, 
-                                                                            max.fanin, 
                                                                             node.names, 
                                                                             clr.algo, 
                                                                             auto.reg.order, 

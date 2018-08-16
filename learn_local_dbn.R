@@ -98,10 +98,10 @@ LearnLocalDbnBnstruct <- function(local.dbn.input.data,
       best.subset.str <- curr.subset.str
     }
     
-    print(tgt.node.idx)
-    print(src.node.idx)
-    print(best.score)
-    print(curr.score)
+    # print(tgt.node.idx)
+    # print(src.node.idx)
+    # print(best.score)
+    # print(curr.score)
     
   }
   

@@ -1,5 +1,11 @@
 packrat/lib*/
 .Rproj.user
 
+## Data files
+asset/InSilico*.tsv
+
+## True network files
+asset/DREAM3GoldStandard*.RData
+
 ## Output directories
 asset/output*/
