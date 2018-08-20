@@ -6,7 +6,8 @@
 #######################################################################################
 LearnLocalDbnBnstruct <- function(local.dbn.input.data, 
                                   node.sizes, 
-                                  scoring.func) {
+                                  scoring.func, 
+                                  init.path) {
   
   ## Number of shortlisted source nodes.
   ## The last col is for the target node.

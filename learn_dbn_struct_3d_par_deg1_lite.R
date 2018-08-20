@@ -21,34 +21,48 @@ LearnDbnStructMo1Layer3dParDeg1_v2_Lite <- function(input.data.discr.3D,
                                                node.names, 
                                                clr.algo, 
                                                auto.reg.order, 
-                                               scoring.func) {
+                                               scoring.func, 
+                                               parallel, 
+                                               output.filename, 
+                                               init.path) {
   #---------------------------------
   # Begin: Loading the Packages
   #---------------------------------
   library(bnlearn)
   # library(ggm)
   library(foreach)
-  library(doParallel)
+  
+  if (parallel) {
+    library(doParallel)
+  }
   #---------------------------------
   # End: Loading the Packages
   #---------------------------------
   
   num.time.trans <- (num.timepts - 1)
   
-  ## Start and register a parallel backend for parallel computing
-  ## 10 cores to be used for grni server 
-  # no_cores <- min(10, num.nodes, (parallel::detectCores() - 1))
-  # cl <- parallel::makeCluster(no_cores, outfile = paste(getwd(), 'asset/outfile.txt', sep = '/' ))
-  # doParallel::registerDoParallel(cl)
+  if (parallel) {
+    ## Start and register a parallel backend for parallel computing
+    ## 10 cores to be used for grni server 
+    num.cores <- min(10, num.nodes, (parallel::detectCores() - 1))
+    cl <- parallel::makeCluster(num.cores, outfile = output.filename)
+    rm(num.cores)
+    doParallel::registerDoParallel(cl)
+}
   
-  # '.verbose = TRUE' is used for debugging
-  # 'when(sum(mi.net.adj.matrix[, tgt.node.idx]) > 0' means when central node has at least one neighbour in the mutual info net
-  # Use %do% amd %dopar% for serial and parallel computing, resp.
+  ## '.verbose = TRUE' is used for debugging
+  ## 'when(sum(mi.net.adj.matrix[, tgt.node.idx]) > 0' means when central node has at least one neighbour in the mutual info net
+  ## Use %do% amd %dopar% for serial and parallel computing, resp.
   local.unrolled.DBN.adj.matrix.list <- 
     foreach::foreach(tgt.node.idx = 1:num.nodes, .packages = c('foreach', 'bnstruct'), .verbose = TRUE) %:% 
     # when(sum(mi.net.adj.matrix[, tgt.node.idx]) != 0) %:%
     foreach::foreach(time.trans.idx = 1:num.time.trans, .packages = c('foreach', 'bnstruct'), .verbose = TRUE) %:%
-    when(sum(mi.net.adj.matrix[, tgt.node.idx]) > 0) %do% {
+    when(sum(mi.net.adj.matrix[, tgt.node.idx]) > 0) %dopar% {
+      
+      source(paste(init.path, 'learn_local_dbn.R', sep = '/'))
+      source(paste(init.path, 'score_bn.R', sep = '/'))
+      dyn.load(paste(init.path, 'src/score_bn.so', sep = '/'))
+      
       tgt.node.name <- rownames(mi.net.adj.matrix)[tgt.node.idx]
       
       # List names of the target node's neighbours in mi.net.adj.matrix
@@ -128,6 +142,9 @@ LearnDbnStructMo1Layer3dParDeg1_v2_Lite <- function(input.data.discr.3D,
       # print('before data frame')
       # local.DBN.input.data <- as.data.frame(local.DBN.input.data)
       
+      if (parallel) {
+        source(paste(init.path, 'learn_local_dbn.R', sep = '/'))
+      }
       ## source(paste(init.path, 'learn_local_dbn.R', sep = '/'))
       ## Returns the list of predicted source nodes for the local DBN.
       local.dbn.pred.src.nodes <- LearnLocalDbnBnstruct(local.DBN.input.data, 
@@ -165,8 +182,11 @@ LearnDbnStructMo1Layer3dParDeg1_v2_Lite <- function(input.data.discr.3D,
   
   # save(local.unrolled.DBN.adj.matrix.list, file = paste(getwd(), 'asset/local.unrolled.DBN.adj.matrix.list.RData', sep = '/'))
   
-  ## Shut down the cluster
-  # parallel::stopCluster(cl)
+  if (parallel) {
+    ## Shut down the cluster
+    parallel::stopCluster(cl)
+  }
+  
   
   # Begin: Unrolled DBN struct learning
   

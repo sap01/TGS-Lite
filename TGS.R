@@ -118,6 +118,10 @@ use.lite <- input.params$use.lite
 
 scoring.func <- input.params$scoring.func
 
+## If TRUE, then use the parallel implementation of TGS-Lite+.
+## Else use its serial implementation.
+parallel <- input.params$parallel
+
 rm(input.params)
 ##------------------------------------------------------------
 ## End: Read User-defined input Params
@@ -527,7 +531,10 @@ if ((clr.algo == 'CLR') | (clr.algo == 'CLR2') | (clr.algo == 'CLR2.1')) {
                                                                             node.names, 
                                                                             clr.algo, 
                                                                             auto.reg.order, 
-                                                                            scoring.func)
+                                                                            scoring.func, 
+                                                                            parallel, 
+                                                                            output.filename, 
+                                                                            init.path)
   } else {
     ## source(paste(init.path, 'learn_dbn_struct_3d_par_deg1.R', sep = '/'))
     unrolled.DBN.adj.matrix.list <- LearnDbnStructMo1Layer3dParDeg1_v2(input.data.discr.3D, 

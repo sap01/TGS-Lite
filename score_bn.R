@@ -2,7 +2,8 @@
 ## 'all_fam_log_marg_lik_v2()' in 'src/score_bn.c'
 ##
 ScoreBn <- function(local.dbn.input.data, node.sizes, scoring.func, 
-                    tgt.node.idx, src.node.idx, num.src.nodes) {
+                    tgt.node.idx, src.node.idx, num.src.nodes, 
+                    init.path) {
   
   num.nodes <- ncol(local.dbn.input.data)
   levels <- rep(0, num.nodes)
