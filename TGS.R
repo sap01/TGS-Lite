@@ -122,6 +122,11 @@ scoring.func <- input.params$scoring.func
 ## Else use its serial implementation.
 parallel <- input.params$parallel
 
+## Maximum number of cores to use if 'parallel' is TRUE.
+## If 'parallel' is FALSE, then param 'max.num.cores'
+## remains unused.
+max.num.cores <- input.params$max.num.cores
+
 rm(input.params)
 ##------------------------------------------------------------
 ## End: Read User-defined input Params
@@ -521,21 +526,42 @@ unrolled.DBN.adj.matrix.list <- NULL
 if ((clr.algo == 'CLR') | (clr.algo == 'CLR2') | (clr.algo == 'CLR2.1')) {
   
   if (use.lite) {
-    ## source(paste(init.path, 'learn_dbn_struct_3d_par_deg1_lite.R', sep = '/')).
-    ## Param 'max.fanin' is not required for this function.
-    unrolled.DBN.adj.matrix.list <- LearnDbnStructMo1Layer3dParDeg1_v2_Lite(input.data.discr.3D, 
-                                                                            mi.net.adj.matrix, 
-                                                                            num.discr.levels, 
-                                                                            num.nodes, 
-                                                                            num.timepts, 
-                                                                            node.names, 
-                                                                            clr.algo, 
-                                                                            auto.reg.order, 
-                                                                            scoring.func, 
-                                                                            parallel, 
-                                                                            output.filename, 
-                                                                            init.path)
+    if (parallel) {
+      ## Parallel implementaion
+      
+      ## source(paste(init.path, 'learn_dbn_struct_3d_par_deg1_lite.R', sep = '/')).
+      ## Param 'max.fanin' is not required for this function.
+      unrolled.DBN.adj.matrix.list <- LearnDbnStructMo1Layer3dParDeg1_v2_Lite(input.data.discr.3D, 
+                                                                              mi.net.adj.matrix, 
+                                                                              num.discr.levels, 
+                                                                              num.nodes, 
+                                                                              num.timepts, 
+                                                                              node.names, 
+                                                                              clr.algo, 
+                                                                              auto.reg.order, 
+                                                                              scoring.func, 
+                                                                              max.num.cores, 
+                                                                              output.filename, 
+                                                                              init.path)
+      
+    } else {
+      ## Serial implementaion
+      
+      ## source(paste(init.path, 'learn_dbn_struct_3d_par_deg1_lite.R', sep = '/')).
+      ## Param 'max.fanin' is not required for this function.
+      unrolled.DBN.adj.matrix.list <- LearnDbnStructMo1Layer3dSerDeg1_v2_Lite(input.data.discr.3D, 
+                                                                              mi.net.adj.matrix, 
+                                                                              num.discr.levels, 
+                                                                              num.nodes, 
+                                                                              num.timepts, 
+                                                                              node.names, 
+                                                                              clr.algo, 
+                                                                              auto.reg.order, 
+                                                                              scoring.func)
+    }
   } else {
+    ## Do not use lite
+    
     ## source(paste(init.path, 'learn_dbn_struct_3d_par_deg1.R', sep = '/'))
     unrolled.DBN.adj.matrix.list <- LearnDbnStructMo1Layer3dParDeg1_v2(input.data.discr.3D, 
                                                                        mi.net.adj.matrix, 
