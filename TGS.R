@@ -35,14 +35,14 @@
 rm(list = ls())
 
 ##------------------------------------------------------------
-## Begin: Load the Required Libraries
+## Begin: Load the required packages
 ##------------------------------------------------------------
 ## For reading from and writing to '.json' files
 library(rjson)
 
 library(minet)
 ##------------------------------------------------------------
-## End: Load the Required Libraries
+## End: Load the required packages
 ##------------------------------------------------------------
 
 ##------------------------------------------------------------

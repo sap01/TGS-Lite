@@ -13,6 +13,17 @@ Source: Bioconductor
 Version: 1.30.0
 Hash: b7e53989dbab5dc09626192456e7abc9
 
+Package: EDISON
+Source: CRAN
+Version: 1.1.1
+Hash: 65b894c801e558773d4eabc5f81401ed
+Requires: MASS, corpcor
+
+Package: MASS
+Source: CRAN
+Version: 7.3-50
+Hash: e8001243da35880bd81391d80eb4eeae
+
 Package: Matrix
 Source: CRAN
 Version: 1.2-14
@@ -84,6 +95,11 @@ Package: codetools
 Source: CRAN
 Version: 0.2-15
 Hash: a4268e48f71dc70ac2203aced7cdd8ea
+
+Package: corpcor
+Source: CRAN
+Version: 1.6.9
+Hash: f641167f85158bfc7cd4b97ac1c26701
 
 Package: curl
 Source: CRAN
