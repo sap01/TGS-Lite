@@ -625,18 +625,17 @@ save(di.net.adj.matrix, file = paste(output.dirname, 'di.net.adj.matrix.RData', 
 ## that is readable in Cytoscape.
 adjmxToSif(di.net.adj.matrix, output.dirname)
 # rm(unrolled.DBN.adj.matrix)
-rm(unrolled.DBN.adj.matrix.list)
 ##------------------------------------------------------------
 ## End: Learn Network Structures
 ##------------------------------------------------------------
 
-## If the true rolled network is known a prior, then evaluate the performance
-## metrics of the predicted rolled network.
-if (true.net.filename != '')
-{
-  predicted.net.adj.matrix <- di.net.adj.matrix
+##------------------------------------------------------------
+## Begin: Calc performance metrics if true net(s) is known
+##------------------------------------------------------------
+if (true.net.filename != '') {
   
   ## Loads R obj 'true.net.adj.matrix'
+  true.net.adj.matrix <- NULL
   load(true.net.filename)
   
   ## Begin: Create the format for result
@@ -644,14 +643,49 @@ if (true.net.filename != '')
   colnames(Result) <- list('TP', 'TN', 'FP', 'FN', 'TPR', 'FPR', 'FDR', 'PPV', 'ACC', 'MCC',  'F')
   # ## End: Create the format for result
   
-  ResultVsTrue <- calcPerfDiNet(predicted.net.adj.matrix, true.net.adj.matrix, Result, num.nodes)
+  if (is.matrix(true.net.adj.matrix)) {
+    ## True net is time-invariant. Therefore, 
+    ## 'true.net.adj.matrix' is a single matrix.
+    
+    predicted.net.adj.matrix <- di.net.adj.matrix
+    
+    ResultVsTrue <- calcPerfDiNet(predicted.net.adj.matrix, true.net.adj.matrix, Result, num.nodes)
+    writeLines('Result TGS vs True = \n')
+    print(ResultVsTrue)
+    rm(ResultVsTrue)
+    
+  } else if (is.list(true.net.adj.matrix)) {
+    ## True nets are time-varying. Therefore, 
+    ## 'true.net.adj.matrix' is a list of matrices.
+    
+    for (net.idx in 1:length(unrolled.DBN.adj.matrix.list)) {
+      
+      predicted.net.adj.matrix <- unrolled.DBN.adj.matrix.list[[net.idx]]
+      
+      ResultVsTrue <- calcPerfDiNet(predicted.net.adj.matrix, true.net.adj.matrix[[net.idx]], Result, num.nodes)
+      Result <- rbind(Result, matrix(ResultVsTrue[1, ], nrow = 1, ncol = ncol(Result)))
+
+      # rm(ResultVsTrue)
+    }
+    rm(net.idx)
+    
+    ## Print mean performance averaged over all time-varying networks
+    ResultVsTrue <- colMeans(Result)
+    ResultVsTrue <- matrix(colMeans(Result), nrow = 1, ncol = ncol(Result))
+    colnames(ResultVsTrue) <- colnames(Result)
+    writeLines('Result TGS vs True = \n')
+    print(ResultVsTrue)
+    rm(ResultVsTrue)
+  }
+  
+  save(Result, file = paste(output.dirname, 'Result.RData', sep = '/'))
   rm(Result)
-  writeLines('Result TGS vs True = \n')
-  print(ResultVsTrue)
-  rm(ResultVsTrue)
 }
 
-rm(di.net.adj.matrix)
+rm(unrolled.DBN.adj.matrix.list, di.net.adj.matrix)
+##------------------------------------------------------------
+## End: Calc performance metrics if true net(s) is known
+##------------------------------------------------------------
 
 elapsed.time <- (proc.time() - start.time) # Stop the timer
 writeLines('elapsed.time = \n')

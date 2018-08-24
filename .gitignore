@@ -1,14 +1,19 @@
 packrat/lib*/
 .Rproj.user
 
+## Packrat bundles
+packrat/bundles/
+
 ## Data files
 asset/InSilico*.tsv
+asset/edi-data*.tsv
 
 ## True network files
 asset/DREAM3GoldStandard*.RData
+asset/edi.net.*
 
 ## Output directories
 asset/output*/
 
-## Packrat bundles
-packrat/bundles/
+## nohup files
+nohup*.out
