@@ -297,23 +297,22 @@ if (max.fanin == 'none') {
 num.samples.per.timept <- (nrow(input.data) / num.timepts)
 
 ## If input data is already discretized
-if (is.discrete)
-{
+if (is.discrete) {
   input.data.discr <- input.data
   
-} else
-{
-  if (discr.algo == '')
-  {
+} else {
+  if (discr.algo == '') {
     stop('Please specify the value of discr.algo.')
     
-  } else if (discr.algo == 'discretizeData.2L.wt.l')
-  {
+  } else if (discr.algo == 'discretizeData.2L.wt.l') {
     input.data.discr <- discretizeData.2L.wt.l(input.data, input.wt.data.filename)
     
-  } else if (discr.algo == 'discretizeData.2L.Tesla')
-  {
+  } else if (discr.algo == 'discretizeData.2L.Tesla') {
     input.data.discr <- discretizeData.2L.Tesla(input.data)
+    
+  } else if (discr.algo == 'discretizeData.3L.1') {
+    input.data.discr <- discretizeData.3L.1(input.data, num.timepts)
+    
   }
   
   save(input.data.discr, file = paste(output.dirname, 'input.data.discr.RData', sep = '/'))

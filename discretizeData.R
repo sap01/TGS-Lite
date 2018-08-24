@@ -239,3 +239,65 @@ discretizeData.2L.Tesla <- function(input.data)
   
   return(input.data)
 }
+##########################################################################################################
+
+##########################################################################################################
+## Goal: Discretize time-series input data into three levels {1, 2, 3} 
+## using the following strategy. 
+## The input data may or may not have multiple time series.
+## For each gene, its expression value(s) at the first time point(s)
+## are assinged level 1. 
+## Level 2: If it belongs to the first time point or if it is same as that 
+## of the previous time point in the same time series.
+## Level 3: If it is higher than that of the previous time point in the same time series.
+## Level 1: If it is lower than that of the previous time point in the same time series.
+##########################################################################################################
+discretizeData.3L.1 <- function(input.data, num.timepts) {
+  
+  ## Num of time series
+  num.ts <- (nrow(input.data) / num.timepts)
+  
+  for (ts.idx in 1:num.ts) {
+    
+    ## Last and first rows of the current time series
+    ## in the 'input.data'
+    last.row <- (num.timepts * ts.idx)
+    first.row <- (last.row - num.timepts + 1)
+    
+    ## Current time series  
+    curr.ts <- input.data[first.row:last.row, ]
+    
+    ## Initialize discretized version of the 
+    ## current time series
+    curr.ts.d <- curr.ts
+    
+    ## Values at the first time point are assigned 
+    ## level 2
+    curr.ts.d[1, ] <- 2
+    
+    for (row.idx in 2:nrow(curr.ts)) {
+      for (col.idx in 1:ncol(curr.ts)) {
+        if (curr.ts[row.idx, col.idx] < curr.ts[(row.idx - 1), col.idx]) {
+          curr.ts.d[row.idx, col.idx] <- 1
+          
+        } else if (curr.ts[row.idx, col.idx] == curr.ts[(row.idx - 1), col.idx]) {
+          curr.ts.d[row.idx, col.idx] <- 2
+          
+        } else if (curr.ts[row.idx, col.idx] > curr.ts[(row.idx - 1), col.idx]) {
+          
+          curr.ts.d[row.idx, col.idx] <- 3
+        }
+      }
+      rm(col.idx)
+    }
+    rm(row.idx)
+    
+    ## Replace continuous data with discretized data
+    input.data[first.row:last.row, ] <- curr.ts.d
+  }
+  rm(ts.idx)
+  
+  ## Return discretized version of the input data
+  return(input.data)
+}
+########################################################################################################## 
