@@ -7,6 +7,7 @@ packrat/bundles/
 ## Data files
 asset/InSilico*.tsv
 asset/edi-data*.tsv
+asset/DmLc*.RData
 
 ## True network files
 asset/DREAM3GoldStandard*.RData
