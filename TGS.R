@@ -639,7 +639,7 @@ if (true.net.filename != '') {
   
   ## Begin: Create the format for result
   Result <- matrix(0, nrow = 1, ncol = 11)
-  colnames(Result) <- list('TP', 'TN', 'FP', 'FN', 'TPR', 'FPR', 'FDR', 'PPV', 'ACC', 'MCC',  'F')
+  colnames(Result) <- list('TP', 'TN', 'FP', 'FN', 'TPR', 'FPR', 'FDR', 'PPV', 'ACC', 'MCC',  'F1')
   # ## End: Create the format for result
   
   if (is.matrix(true.net.adj.matrix)) {
