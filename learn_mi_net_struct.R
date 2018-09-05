@@ -598,7 +598,7 @@ LearnClr3NetMfi <- function(input.data.discr.3D, num.nodes, node.names, num.time
         ## compute_cmi.R
         ## (dim1 == 1) => time.pt.idx
         ## (dim1 == 2) => (time.pt.idx + 1)
-        mut.info <- ComputeCmi(input.data.discr.3D.curr.ival[1, col.idx, ], 
+        mut.info <- ComputeCmiPcaCmi(input.data.discr.3D.curr.ival[1, col.idx, ], 
                                input.data.discr.3D.curr.ival[2, col.idx.2, ])
         
         mut.info.matrix[col.idx, col.idx.2] <- mut.info
