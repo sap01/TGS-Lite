@@ -56,6 +56,19 @@ unsigned int get_bits( unsigned int word, unsigned int * bits, unsigned int size
  * LL(G|D) - f(|D|)|B| 
  * |B| = \sum_{i=1}^{|V|} (r_i - 1) * q_i
  */
+/*
+ * Input parameters:
+ * d = data.
+ * n_nodes = number of nodes.
+ * n_cases = number of replicates per node per time point.
+ * ns = an array containing node sizes i.e. the discrete levels of nodes; 
+ * 	ns[i] = number of discrete levls of the i-th node.
+ * ni = node index of the target node.
+ * pa = an array containing the indices of the candidate parent nodes.
+ * n_pa = number of candidate parent nodes.
+ * penalty = sparsity penalty to be deducted from the computed 
+ * log likelihood for the given scoing function.
+*/
 double log_likelihood ( unsigned int * d, unsigned int n_nodes, unsigned int n_cases, unsigned int * ns, 
                         unsigned int ni, unsigned int * pa, unsigned int n_pa, double penalty ) {
   int i, j, index, elmt, stride;
@@ -65,11 +78,25 @@ double log_likelihood ( unsigned int * d, unsigned int n_nodes, unsigned int n_c
   int cum_prod_sizes[n_pa+2]; 
   cum_prod_sizes[0] = 1;
   cum_prod_sizes[1] = ns[ni];
+
+  /*
+   * Time complexity of the following for loop 
+   * = n_pa
+   * = number of candidate parents of the given target node
+   * = O(M_f).
+  */
   for( i = 0; i < n_pa; i++ )
     cum_prod_sizes[i+2] = cum_prod_sizes[i+1] * ns[pa[i]];
   
   int strides[n_pa + 1];
   strides[0] = ni * n_cases;
+
+  /*
+   * Time complexity of the following for loop 
+   * = n_pa
+   * = number of candidate parents of the given target node
+   * = O(M_f).
+  */	
   for( i = 0; i < n_pa; i++ )
     strides[i+1] = pa[i] * n_cases;
   
@@ -82,9 +109,21 @@ double log_likelihood ( unsigned int * d, unsigned int n_nodes, unsigned int n_c
   double * counts = calloc( prod_sizes, sizeof(double) ); 
   
   // compute counts, skipping NAs
+  /*
+   * Number of iterations for the following for loop
+   * = n_cases
+   * = S.
+  */
   for( i = 0; i < n_cases; i++ ) {
     index = 0;
+
     // sum using strides
+    /*
+     * Time complexity of the following for loop 
+     * = (n_pa + 1)
+     * = (number of candidate parents of the given target node + 1)
+     * = (O(M_f) + 1).
+    */
     for( j = 0; j < n_pa + 1; j++ ) {
       elmt = d[ i + strides[j] ];
       if( elmt == NA_INTEGER )
@@ -111,11 +150,22 @@ double log_likelihood ( unsigned int * d, unsigned int n_nodes, unsigned int n_c
   // compute log likelihood
   logl = 0.0;
   
+  /*
+   * Number of iterations for the following for loop
+   * = prod_sizes_pa
+   * = product of the numbers of discrete levels of 
+   * 	the candidate parent nodes.
+  */
   for( i = 0; i < prod_sizes_pa; i++ )
   {
     stride = i * ns[ni];
     acc    = counts[stride];
-    
+
+    /*
+     * Time complexity of the following for loop 
+     * = (ns[ni] - 1)
+     * = (Number of discrete levels of the target node - 1).
+    */    
     for( j = 1; j < ns[ni]; j++ )
     {
       acc  += counts[stride + j];
@@ -123,6 +173,11 @@ double log_likelihood ( unsigned int * d, unsigned int n_nodes, unsigned int n_c
     
     acc = log(acc + 1);
     
+    /*
+     * Time complexity of the following for loop 
+     * = (ns[ni] - 1)
+     * = (Number of discrete levels of the target node - 1).
+    */
     for ( j = 1 ; j < ns[ni] ; j++ )
     {
       logl += counts[stride + j] * (log(counts[stride + j] + 1) - acc);
