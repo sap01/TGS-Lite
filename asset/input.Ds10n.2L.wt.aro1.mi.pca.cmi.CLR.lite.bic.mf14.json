@@ -13,5 +13,7 @@
    "max.fanin": 14,
    "allow.self.loop": false,
    "use.lite": true,
-   "scoring.func": "BIC"
+   "scoring.func": "BIC",
+   "parallel": false,
+   "max.num.cores": 1
 }
