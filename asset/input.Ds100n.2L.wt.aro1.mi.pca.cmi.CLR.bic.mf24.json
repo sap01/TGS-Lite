@@ -10,10 +10,10 @@
    "mi.estimator": "mi.pca.cmi",
    "apply.aracne": false,
    "clr.algo": "CLR",
-   "max.fanin": 14,
+   "max.fanin": 24,
    "allow.self.loop": false,
-   "use.lite": true,
+   "use.lite": false,
    "scoring.func": "BIC", 
-   "parallel": true,
-   "max.num.cores": 7
+   "parallel": false,
+   "max.num.cores": 1
 }

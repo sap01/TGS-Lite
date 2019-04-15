@@ -8,12 +8,10 @@
    "discr.algo": "discretizeData.2L.wt.l",
    "auto.reg.order": 1,
    "mi.estimator": "mi.pca.cmi",
-   "apply.aracne": false,
+   "apply.aracne": true,
    "clr.algo": "CLR",
-   "max.fanin": 14,
+   "max.fanin": "none",
    "allow.self.loop": false,
    "use.lite": true,
-   "scoring.func": "BIC", 
-   "parallel": true, 
-   "max.num.cores": 10
+   "scoring.func": "BIC"
 }
