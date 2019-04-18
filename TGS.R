@@ -595,6 +595,7 @@ if ((clr.algo == 'CLR') | (clr.algo == 'CLR2') | (clr.algo == 'CLR2.1')) {
   
   rm(num.time.ivals, time.ival.spec.dbn.adj.matrix)
   
+  ## 'learn_dbn_struct_3d_par_deg1.R'
   unrolled.DBN.adj.matrix.list <- LearnDbnStructMo1Clr3Ser(input.data.discr.3D, mi.net.adj.matrix.list.filename, 
                                                            num.discr.levels, num.nodes, num.timepts, max.fanin, 
                                                            node.names, unrolled.DBN.adj.matrix.list)

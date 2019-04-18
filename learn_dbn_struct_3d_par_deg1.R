@@ -1675,8 +1675,8 @@ LearnDbnStructMo1Clr3Ser <- function(input.data.discr.3D, mi.net.adj.matrix.list
         next
       }
       
-      ## E.g., 'v1_t2'
-      ## Do not use rownames
+      ## E.g., 'v1_t2'.
+      ## Do not use rownames.
       tgt.node.name <- colnames(mi.net.adj.matrix)[tgt.node.idx]
       
       ## E.g., 'v1'

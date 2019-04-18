@@ -591,22 +591,41 @@ LearnClr3NetMfi <- function(input.data.discr.3D, num.nodes, node.names, num.time
                               dimnames = c(list(candidate.parent.node.names), 
                                            list(candidate.tgt.node.names)))
     
+    #################################################################################
+    # ## Build mutual information matrix
+    # for (col.idx in 1:(num.nodes - 1)) {
+    #   for (col.idx.2 in (col.idx + 1):num.nodes) {
+    #     
+    #     ## compute_cmi.R
+    #     ## (dim1 == 1) => time.pt.idx
+    #     ## (dim1 == 2) => (time.pt.idx + 1)
+    #     mut.info <- ComputeCmiPcaCmi(input.data.discr.3D.curr.ival[1, col.idx, ], 
+    #                            input.data.discr.3D.curr.ival[2, col.idx.2, ])
+    #     
+    #     mut.info.matrix[col.idx, col.idx.2] <- mut.info
+    #     mut.info.matrix[col.idx.2, col.idx] <- mut.info
+    #   }
+    #   rm(col.idx.2)
+    # }
+    # rm(col.idx)
+    #################################################################################
     ## Build mutual information matrix
-    for (col.idx in 1:(num.nodes - 1)) {
-      for (col.idx.2 in (col.idx + 1):num.nodes) {
+    for (parent.idx in 1:num.nodes) {
+      for (tgt.idx in 1:num.nodes) {
         
         ## compute_cmi.R
         ## (dim1 == 1) => time.pt.idx
         ## (dim1 == 2) => (time.pt.idx + 1)
-        mut.info <- ComputeCmiPcaCmi(input.data.discr.3D.curr.ival[1, col.idx, ], 
-                               input.data.discr.3D.curr.ival[2, col.idx.2, ])
+        mut.info <- ComputeCmiPcaCmi(input.data.discr.3D.curr.ival[1, parent.idx, ], 
+                                     input.data.discr.3D.curr.ival[2, tgt.idx, ])
         
-        mut.info.matrix[col.idx, col.idx.2] <- mut.info
-        mut.info.matrix[col.idx.2, col.idx] <- mut.info
+        ## Mutual info matrix is assymetric in this case
+        mut.info.matrix[parent.idx, tgt.idx] <- mut.info
       }
-      rm(col.idx.2)
+      rm(tgt.idx)
     }
-    rm(col.idx)
+    rm(parent.idx)
+    #################################################################################
     
     ## Initialize unweighted adjacency matrix of the CLR net
     ## corr. to the current time interval
